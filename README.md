@@ -21,7 +21,7 @@
 
 <br>
 
-## How to test project?
+## How to test the project?
 ``task test``
 
 <br>
