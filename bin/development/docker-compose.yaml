@@ -1,0 +1,79 @@
+services:
+  gocourse-api:
+    tty: true
+    container_name: gocourse-api
+    image: gocourse-api
+    depends_on:
+      gocourse-postgres:
+        condition: service_healthy
+      gocourse-valkey:
+        condition: service_healthy
+    build:
+      context: ../../
+      dockerfile: bin/development/Dockerfile
+    env_file:
+      - path: .env
+    networks:
+      - gocourse
+
+  gocourse-postgres:
+    tty: true
+    container_name: gocourse-postgres
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gocourse
+      POSTGRES_USER: gocourse
+      POSTGRES_PASSWORD: gocourse
+    ports:
+      - "5432:5432"
+    volumes:
+      - gocourse_postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - gocourse
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gocourse -d gocourse" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  gocourse-valkey:
+    tty: true
+    image: valkey/valkey:8.1.4-alpine
+    container_name: gocourse-valkey
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - gocourse_valkey_dev_data:/data
+    networks:
+      - gocourse
+    healthcheck:
+      test: [ "CMD", "valkey-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  gocourse-caddy:
+    image: caddy:2.10.2-alpine
+    tty: true
+    container_name: gocourse-caddy
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - gocourse_caddy_dev_data:/data
+      - gocourse_caddy_dev_config:/config
+    networks:
+      - gocourse
+
+volumes:
+  gocourse_postgres_dev_data:
+  gocourse_valkey_dev_data:
+  gocourse_caddy_dev_data:
+  gocourse_caddy_dev_config:
+
+networks:
+  gocourse:
+    name: gocourse

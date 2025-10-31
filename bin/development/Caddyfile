@@ -1,0 +1,5 @@
+http://localhost {
+	handle_path /api/v1/* {
+		reverse_proxy gocourse-api:80
+	}
+}

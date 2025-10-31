@@ -1,0 +1,17 @@
+docker_compose('docker-compose.yaml')
+
+docker_build('gocourse-api', '../../',
+	dockerfile='Dockerfile',
+	build_args = { "NAME": "api", "PORT": "80" },
+  live_update = [
+    sync('../../', '/app/api'),
+  ],
+)
+
+# Application
+dc_resource('gocourse-api', labels=['application'])
+
+# Infrastructure
+dc_resource('gocourse-caddy', labels=['infrastructure'])
+dc_resource('gocourse-valkey', labels=['infrastructure'])
+dc_resource('gocourse-postgres', labels=['infrastructure'])

@@ -1,0 +1,24 @@
+version: '3'
+
+tasks:
+  test:
+    cmds:
+      - go test -v ./...
+
+  migrate:create:
+    desc: "Vytvoří nový soubor migrace (UP/DOWN). Použití: task migrate:create NAME=nazev_migrace"
+    cmds:
+      - migrate create -ext sql -dir migrations -seq {{.NAME}}
+    params:
+      NAME:
+        default: new_migration
+
+  migrate:up:
+    desc: "Aplikuje migrace (UP) s URI z ENV souboru. Použití: task migrate:up ENV_PATH=bin/development/.env"
+    dotenv:
+      - '{{.ENV_PATH}}'
+    params:
+      ENV_PATH:
+        default: .env
+    cmds:
+      - migrate -database "${MIGRATION_DB_URI}" -path migrations up
