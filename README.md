@@ -34,6 +34,8 @@
 ## How to migrate?
 ``task migrate:up ENV_PATH=bin/development/.env``
 
+<br>
+
 ## Endpoints
 - ``GET http://localhost/api/v1/users/:id``
 - ``POST http://localhost/api/v1/users``
